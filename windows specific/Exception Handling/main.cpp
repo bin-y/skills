@@ -30,7 +30,7 @@ int main() {
 			TRIGGER_EXCEPTION;
 		}
 		__except(1) {
-			printf("won't approach");
+			printf("won't approach\n");
 		}
 		__try {
 			__try {
@@ -45,7 +45,7 @@ int main() {
 		}
 	}
 	__except (1) {
-		printf("won't approach");
+		printf("won't approach\n");
 	}
 	return 0;
 }
