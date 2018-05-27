@@ -77,5 +77,7 @@ int main() {
 		worker_thread.object->join(); // funnny thread won't return, it keeps waiting for do_work_event
 	}
 	printf("won't approach\n");
+	// in case someone will pick on this:
+	// I know some handle is not closed, but clean up code after this line will not execute anyway.
 	return 0;
 }
