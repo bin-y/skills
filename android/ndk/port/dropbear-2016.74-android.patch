@@ -1,0 +1,123 @@
+diff -Naur dropbear-2016.74/common-session.c dropbear-2016.74-android/common-session.c
+--- dropbear-2016.74/common-session.c	2016-07-21 11:17:09.000000000 -0400
++++ dropbear-2016.74-android/common-session.c	2017-02-26 11:32:57.195339071 -0500
+@@ -601,7 +601,11 @@
+ 	ses.authstate.pw_uid = pw->pw_uid;
+ 	ses.authstate.pw_gid = pw->pw_gid;
+ 	ses.authstate.pw_name = m_strdup(pw->pw_name);
++#ifndef CUSTOM_PW_DIR
+ 	ses.authstate.pw_dir = m_strdup(pw->pw_dir);
++#else 
++	ses.authstate.pw_dir = m_strdup(CUSTOM_PW_DIR);
++#endif
+ 	ses.authstate.pw_shell = m_strdup(pw->pw_shell);
+ 	{
+ 		char *passwd_crypt = pw->pw_passwd;
+diff -Naur dropbear-2016.74/compat.c dropbear-2016.74-android/compat.c
+--- dropbear-2016.74/compat.c	2016-07-21 11:17:09.000000000 -0400
++++ dropbear-2016.74-android/compat.c	2017-02-26 11:10:59.689361075 -0500
+@@ -235,7 +235,7 @@
+ 
+ static char **initshells() {
+ 	/* don't touch this list. */
+-	static const char *okshells[] = { "/bin/sh", "/bin/csh", NULL };
++	static const char *okshells[] = { "/system/bin/sh", "/system/bin/csh", NULL };
+ 	register char **sp, *cp;
+ 	register FILE *fp;
+ 	struct stat statb;
+diff -Naur dropbear-2016.74/options.h dropbear-2016.74-android/options.h
+--- dropbear-2016.74/options.h	2016-07-21 11:17:09.000000000 -0400
++++ dropbear-2016.74-android/options.h	2017-02-26 11:48:54.218323088 -0500
+@@ -21,13 +21,13 @@
+ 
+ /* Default hostkey paths - these can be specified on the command line */
+ #ifndef DSS_PRIV_FILENAME
+-#define DSS_PRIV_FILENAME "/etc/dropbear/dropbear_dss_host_key"
++#define DSS_PRIV_FILENAME "/sdcard/etc/dropbear/dropbear_dss_host_key"
+ #endif
+ #ifndef RSA_PRIV_FILENAME
+-#define RSA_PRIV_FILENAME "/etc/dropbear/dropbear_rsa_host_key"
++#define RSA_PRIV_FILENAME "/sdcard/etc/dropbear/dropbear_rsa_host_key"
+ #endif
+ #ifndef ECDSA_PRIV_FILENAME
+-#define ECDSA_PRIV_FILENAME "/etc/dropbear/dropbear_ecdsa_host_key"
++#define ECDSA_PRIV_FILENAME "/sdcard/etc/dropbear/dropbear_ecdsa_host_key"
+ #endif
+ 
+ /* Set NON_INETD_MODE if you require daemon functionality (ie Dropbear listens
+@@ -130,8 +130,8 @@
+  * These hashes are also used for public key fingerprints in logs.
+  * If you disable MD5, Dropbear will fall back to SHA1 fingerprints,
+  * which are not the standard form. */
+-#define DROPBEAR_SHA1_HMAC
+-#define DROPBEAR_SHA1_96_HMAC
++// #define DROPBEAR_SHA1_HMAC
++// #define DROPBEAR_SHA1_96_HMAC
+ #define DROPBEAR_SHA2_256_HMAC
+ #define DROPBEAR_SHA2_512_HMAC
+ #define DROPBEAR_MD5_HMAC
+@@ -146,7 +146,7 @@
+  * Removing either of these won't save very much space.
+  * SSH2 RFC Draft requires dss, recommends rsa */
+ #define DROPBEAR_RSA
+-#define DROPBEAR_DSS
++// #define DROPBEAR_DSS
+ /* ECDSA is significantly faster than RSA or DSS. Compiling in ECC
+  * code (either ECDSA or ECDH) increases binary size - around 30kB
+  * on x86-64 */
+@@ -300,12 +300,12 @@
+  * OpenSSH), set the path below. If the path isn't defined, sftp will not
+  * be enabled */
+ #ifndef SFTPSERVER_PATH
+-#define SFTPSERVER_PATH "/usr/libexec/sftp-server"
++#define SFTPSERVER_PATH "/sdcard/sftp-server"
+ #endif
+ 
+ /* This is used by the scp binary when used as a client binary. If you're
+  * not using the Dropbear client, you'll need to change it */
+-#define DROPBEAR_PATH_SSH_PROGRAM "/usr/bin/dbclient"
++#define DROPBEAR_PATH_SSH_PROGRAM "/sdcard/dbclient"
+ 
+ /* Whether to log commands executed by a client. This only logs the 
+  * (single) command sent to the server, not what a user did in a 
+@@ -347,7 +347,11 @@
+ #define DEFAULT_IDLE_TIMEOUT 0
+ 
+ /* The default path. This will often get replaced by the shell */
+-#define DEFAULT_PATH "/usr/bin:/bin"
++#define DEFAULT_PATH "/system/bin"
++
++#define CUSTOM_PW_DIR "/sdcard/etc/dropbear"
++#define NO_CHECK_PUBKEYPERMS
++#define USE_DEV_PTMX
+ 
+ /* Some other defines (that mostly should be left alone) are defined
+  * in sysoptions.h */
+diff -Naur dropbear-2016.74/svr-authpubkey.c dropbear-2016.74-android/svr-authpubkey.c
+--- dropbear-2016.74/svr-authpubkey.c	2016-07-21 11:17:09.000000000 -0400
++++ dropbear-2016.74-android/svr-authpubkey.c	2017-02-26 11:42:21.967329639 -0500
+@@ -366,12 +366,12 @@
+  * ~/.ssh/authorized_keys are all owned by either root or the user, and are
+  * g-w, o-w */
+ static int checkpubkeyperms() {
+-
+ 	char* filename = NULL; 
+ 	int ret = DROPBEAR_FAILURE;
+ 	unsigned int len;
+ 
+ 	TRACE(("enter checkpubkeyperms"))
++#ifndef NO_CHECK_PUBKEYPERMS
+ 
+ 	if (ses.authstate.pw_dir == NULL) {
+ 		goto out;
+@@ -408,7 +408,9 @@
+ 	
+ out:
+ 	m_free(filename);
+-
++#else // NO_CHECK_PUBKEYPERMS
++  ret = DROPBEAR_SUCCESS;
++#endif // NO_CHECK_PUBKEYPERMS
+ 	TRACE(("leave checkpubkeyperms"))
+ 	return ret;
+ }
