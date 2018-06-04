@@ -135,7 +135,7 @@ public:
 					new_ranges[new_range_count - 1].end = after_last_overlapped->end;
 				}
 			}
-			auto activated_count = 0;
+			auto actived_count = 0;
 			auto affect_count = 0;
 
 			auto erase_begin = ranges.end();
@@ -153,9 +153,9 @@ public:
 					erase_end++;
 				}
 				else {
-					memcpy(&*insert_begin, &new_ranges[activated_count], sizeof(column_range));
+					memcpy(&*insert_begin, &new_ranges[actived_count], sizeof(column_range));
 					insert_begin++;
-					activated_count++;
+					actived_count++;
 				}
 			}
 
@@ -167,7 +167,7 @@ public:
 					else {
 						for (auto i = ranges.begin(); i != ranges.end(); i++) {
 							if (i->begin > end_column) {
-								ranges.insert(i, new_ranges[activated_count]);
+								ranges.insert(i, new_ranges[actived_count]);
 								break;
 							}
 						}
@@ -178,8 +178,8 @@ public:
 				}
 			}
 			else {
-				for (; activated_count < new_range_count; activated_count++) {
-					ranges.insert(insert_begin, new_ranges[activated_count]);
+				for (; actived_count < new_range_count; actived_count++) {
+					ranges.insert(insert_begin, new_ranges[actived_count]);
 				}
 			}
 			ranges.erase(erase_begin, erase_end);
