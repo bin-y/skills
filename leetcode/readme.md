@@ -4,7 +4,7 @@ leetcode
 I really hate this!
 -------
 
-I have no interest in this shit, just doing this for the interview to get a job.
+I have no interest in this s**t, just doing this for the interview to get a job.
 
 I'm more good at engineering and there are a lot of engineering ideas, that is more interesting and meaningful, waiting for take my time.
 
