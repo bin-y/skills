@@ -1,9 +1,7 @@
 leetcode
 =============
 
-~~I really hate this!~~
--------
-This is good
+~~I really hate this!~~ This is good
 -------
 
 ~~I have no interest in this s**t, just doing this for the interview to get a job.~~
