@@ -6,6 +6,7 @@ public:
             mask ^= n;
         }
         
+        // keep lowest non-zero bit
         mask &= -mask;
         vector<int> res = {0,0};
         
