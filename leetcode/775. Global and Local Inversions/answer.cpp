@@ -17,6 +17,7 @@ public:
 
             //assume table[0] is aligned
             auto misaligned = value % sizeof(uintptr_t);
+            while (misaligned) {
                 value--;
                 new_global_inversion += table[value];
                 misaligned--;
