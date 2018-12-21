@@ -35,7 +35,7 @@ public:
         do_record(y, x, 1 / value);
         // value = x / y
         const auto& y_records = records[y];
-        // enmuernate y / z record
+        // enumerate y / z record
         for (auto& pair : y_records) {
           do_record(x, pair.first, pair.second * value);
         }
