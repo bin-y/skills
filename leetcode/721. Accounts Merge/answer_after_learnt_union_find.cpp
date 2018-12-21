@@ -60,7 +60,9 @@ public:
     
     auto source_root_to_result_index_ =  unique_ptr<int>(new int[account_count]);
     auto source_root_to_result_index = source_root_to_result_index_.get();
-    memset(source_root_to_result_index, -1, account_count * sizeof(int));
+    for (auto i = 0; i < account_count; i++) {
+      source_root_to_result_index[i] = -1;
+    }
     
     auto result_count = 0;
     vector<vector<string>> result(account_count);
