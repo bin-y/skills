@@ -2,9 +2,11 @@
 ![screenshot](images/lanuage%20-%20the%20cost%20of%20std%20variant.png)
 
 ### conclustion
-Every get/get_if call will cost a
+Every get/get_if call will cost a cmp + jne
+```
 cmp BYTE PTR[], index
 jne/je throw_exception
+```
 
 ### the code
 ``` cpp
