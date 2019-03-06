@@ -1,5 +1,5 @@
 ﻿### compiler result
-![screenshot](/images/lanuage - the cost of std variant.png)
+![screenshot](images/lanuage%20-%20the%20cost%20of%20std%20variant.png)
 
 ### conclustion
 Every get/get_if call will cost a
