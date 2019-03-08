@@ -1,7 +1,7 @@
 ﻿### compiler result
 ![screenshot](images/compiler%20-%20rvo%20and%20move.png)
 
-### conclustion
+### conclusion
 This is correct: http://www.dietmar-kuehl.de/mirror/c++-faq/ctors.html#faq-10.9
 
 ### the code

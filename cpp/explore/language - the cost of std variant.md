@@ -1,11 +1,11 @@
 ﻿### compiler result
 ![screenshot](images/lanuage%20-%20the%20cost%20of%20std%20variant.png)
 
-### conclustion
-Every get/get_if call will cost a cmp + jne
+### conclusion
+Every get/get_if call best case happens when type matches, will cost a cmp + jne
 ```
 cmp BYTE PTR[], index
-jne/je throw_exception
+jne throw_exception / assign_zero
 ```
 
 ### the code
