@@ -6,8 +6,8 @@ class Bucket {
     using ListType = std::list<NodeType>;
     using MapType = std::map<HashedKeyType, ValueType>;
 
+    // return pointer of bucket transfer to, return nullptr if not transfer
     using TransferNodesCallbackExample = std::function<Bucket*(NodeType&)>;
-    // return nullptr if not transfer
 
     int put(HashedKeyType&& key, ValueType& value) {
       auto node = find(key);
@@ -70,7 +70,7 @@ class Bucket {
       else {
         auto map = std::get_if<MapType>(&nodes_);
         assert(map);
-        transfer_nodes_impl(nodes, std::forward<CallbackType>(callback));
+        transfer_nodes_impl(map, std::forward<CallbackType>(callback));
         if (map->size() < MapOrListSizeBoundary) {
           nodes_ = transform_to_list(*map);
         }
@@ -83,12 +83,12 @@ class Bucket {
     void transfer_nodes_impl(NodesType nodes, CallbackType&& callback) {
       auto i = nodes->begin();
       while (i != nodes->end()) {
-        auto other = callback(*i);
-        if (!other) {
+        auto transfer_to = callback(*i);
+        if (!transfer_to) {
           i++;
           continue;
         }
-        other->put_node(std::move(*i));
+        transfer_to->put_node(std::move(*i));
         i = nodes->erase(i);
       }
     }
@@ -103,20 +103,19 @@ class Bucket {
       return i;
     }
 
-    template<typename... _Args>
-    void put_node(_Args&&... __args) {
+    void put_node(NodeType&& node) {
       if (auto nodes = std::get_if<ListType>(&nodes_)) {
         if (nodes->size() < MapOrListSizeBoundary) {
-          nodes->emplace_back(std::forward<_Args>(__args)...);
+          nodes->emplace_back(std::move(node));
         }
         else {
           auto map = transform_to_map(*nodes);
-          map.emplace(std::forward<_Args>(__args)...);
+          map.emplace(std::move(node));
           nodes_ = std::move(map);
         }
       }
       else {
-        std::get<MapType>(nodes_).emplace(std::forward<_Args>(__args)...);
+        std::get<MapType>(nodes_).emplace(std::move(node));
       }
     }
 
@@ -157,7 +156,7 @@ public:
     }
     auto size_changed = bucket->put(std::make_pair(hash, key), value);
     if (size_changed) {
-      size_ += 1;
+      size_ += size_changed;
       auto load_factor = 1.0 * size_ / capacity_;
       if (load_factor > max_load_factor_) {
         resize_double();
@@ -188,7 +187,7 @@ public:
       return;
     }
     auto hashed_key = std::make_pair(hash, key);
-    bucket->remove(hashed_key);
+    size_ -= bucket->remove(hashed_key);
   }
   
 private:
